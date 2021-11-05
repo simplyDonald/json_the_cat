@@ -1,35 +1,32 @@
 const request = require('request');
 
 
-let domain = 'https://api.thecatapi.com/v1/breeds/search/?q=' + process.argv[2];
 
-request(domain, (error, response, body) => {
-  if (error) {
-    console.log(`Error: ${error.errno},  ${error.code}`);
-    return;
-  }
 
-  if (body === '[]') {
-    console.log(`We couldn't find that cat breed 😿`);
-    return;
-  }
-
-  // console.log(typeof body);
-  try {
-    let data = JSON.parse(body);
-    process.stdout.write(data[0].description + '\n');
-  } catch (err) {
-    process.stdout.write(`⛔There's a problem reading the JSON\n`);
-  }
-  // fs.writeFile(filePath,body, err => {
-  //   if(err){
-  //     console.log(err);
-  //     return;
-  //   }
-    
-  //   let {size} = fs.statSync(filePath);
-  //   console.log(`Downloaded and saved ${size} bytes to ./index.html`);
-    
-  // });
+const fetchBreedDescription = function(breedName, callback) {
+  let domain = 'https://api.thecatapi.com/v1/breeds/search/?q=' + breedName;
   
-});
+  request(domain, (error, response, body) => {
+    if (error) {
+      callback(error,null);
+      return;
+    }
+    // console.log(response.statusCode);
+    // console.log(body);
+    let data = JSON.parse(body);
+    // console.log(body);
+    // if(data.length === 0) {
+    if(body === '[]') {
+      let message = 'Incorrect breed name';
+      callback(null,message);
+      return;
+    }
+    // console.log(data);
+    let {description} = data[0];
+    // console.log(description);
+    callback(null,description);
+    
+  });
+};
+module.exports = {fetchBreedDescription};
+
